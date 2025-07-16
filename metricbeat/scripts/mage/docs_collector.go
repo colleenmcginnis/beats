@@ -21,9 +21,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -40,6 +42,7 @@ type moduleData struct {
 	Base       string
 	Title      string `yaml:"title"`
 	Release    string `yaml:"release"`
+	Version    string `yaml:"version"`
 	Dashboards bool
 	Settings   []string `yaml:"settings"`
 	CfgFile    string
@@ -53,6 +56,7 @@ type metricsetData struct {
 	Title      string
 	Link       string
 	Release    string
+	Version    string
 	DataExists bool
 	Data       string
 	IsDefault  bool
@@ -101,6 +105,22 @@ func setupDirectory() error {
 		return err
 	}
 	return os.MkdirAll(docpath, 0755)
+}
+
+func getVersion(rel string) (string, error) {
+	pattern := `^\^\d+\.\d+(\.\d+)$`
+	matched, err := regexp.MatchString(pattern, rel)
+	if err != nil {
+		fmt.Println("Error compiling regex:", err)
+		return "", nil
+	}
+	log.Print(matched)
+	if matched {
+		return rel[1:], nil
+	} else {
+		return "", nil
+	}
+
 }
 
 // getRelease gets the release tag, and errors out if one doesn't exist.
@@ -186,6 +206,27 @@ func loadModuleFields(file string) (moduleData, error) {
 	return module, nil
 }
 
+func getVersionNumber(metricsetPath string) (string, error) {
+	raw, err := os.ReadFile(metricsetPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read from spec file: %w", err)
+	}
+	type metricset struct {
+		Version string `yaml:"version"`
+	}
+	var rel []metricset
+	if err = yaml.Unmarshal(raw, &rel); err != nil {
+		return "", err
+	}
+
+	relString, err := getVersion(rel[0].Version)
+	log.Print(relString)
+	if err != nil {
+		return "", nil
+	}
+	return relString, nil
+}
+
 // getReleaseState gets the release tag in the metricset-level fields.yml, since that's all we need from that file
 func getReleaseState(metricsetPath string) (string, error) {
 	raw, err := os.ReadFile(metricsetPath)
@@ -259,6 +300,7 @@ func gatherMetricsets(modulePath string, moduleName string, defaultMetricSets []
 		}
 		metricsetName := filepath.Base(metricset)
 		release, err := getReleaseState(filepath.Join(metricset, "_meta/fields.yml"))
+		version, err := getVersionNumber(filepath.Join(metricset, "_meta/fields.yml"))
 		if err != nil {
 			return nil, err
 		}
@@ -290,6 +332,7 @@ func gatherMetricsets(modulePath string, moduleName string, defaultMetricSets []
 			Doc:        strings.TrimSpace(string(metricsetDoc)),
 			Title:      metricsetName,
 			Release:    release,
+			Version:    version,
 			Link:       link,
 			DataExists: hasData,
 			Data:       strings.TrimSpace(string(data)),

@@ -1,8 +1,9 @@
 - name: ntp
   type: group
+  version: ^9.1.0
+  release: beta
   description: >
     `ntp` contains Network Time Protocol (NTP) metrics.
-  release: beta
   fields:
   - name: host
     type: keyword
