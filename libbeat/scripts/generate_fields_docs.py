@@ -43,6 +43,26 @@ See the [ECS reference](ecs://reference/index.md) for more information.
             output.write("{}\n\n".format(section["description"].strip()))
         else:
             output.write("## {} [_{}]\n\n".format(section["name"], section["name"]))
+            # If there's a `version` in the YAML file, add an `applies_to` tag to the
+            # heading. A lifecycle type (ga, beta, etc) is required when using `applies_to`
+            # with a specific version. Use `release` if one exists or use `ga` if no `release`
+            # exists.
+            if "version" in section:
+              output.write(
+                "```{{applies_to}}\nstack: {} {}\n```\n\n".format(
+                  section["release"] or "ga",
+                  section["version"]
+                )
+              )
+            # If there's no version, but there is a `release` in the YAML file AND
+            # it's not `ga`, then add an `applies_to`` tag to the heading that includes
+            # the release type but no version.
+            elif "release" in section and section["release"] != "ga":
+              output.write(
+                "```{{applies_to}}\nstack: {}\n```\n\n".format(
+                  section["release"]
+                )
+              )
             output.write("{}\n\n".format(section["description"].strip()))
 
     if "fields" not in section or not section["fields"]:
@@ -71,6 +91,8 @@ def document_field(output, field, field_path):
     if "field_path" not in field:
         field["field_path"] = field_path
 
+    # TO DO: We could do something similar that we did for
+    # sections here for individual fields.
     output.write("**`{}`**\n".format(field["field_path"]))
     output.write(":   ")
 
@@ -137,7 +159,7 @@ mapped_pages:
 ---
 
 % This file is generated! See scripts/generate_fields_docs.py
-                 
+
 # Exported fields [exported-fields]
 
 This document describes the fields that are exported by {title}. They are grouped in the following categories:
