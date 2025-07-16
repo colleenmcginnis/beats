@@ -43,6 +43,10 @@ See the [ECS reference](ecs://reference/index.md) for more information.
             output.write("{}\n\n".format(section["description"].strip()))
         else:
             output.write("## {} [_{}]\n\n".format(section["name"], section["name"]))
+            if "version" in section and section["version"] != "^9.0.0":
+              output.write("```{{applies_to}}\nstack: {} {}\n```\n\n".format(section["release"] or "ga", section["version"]))
+            elif "release" in section and section["release"] != "ga":
+              output.write("```{{applies_to}}\nstack: {}\n```\n\n".format(section["release"]))
             output.write("{}\n\n".format(section["description"].strip()))
 
     if "fields" not in section or not section["fields"]:
@@ -71,8 +75,8 @@ def document_field(output, field, field_path):
     if "field_path" not in field:
         field["field_path"] = field_path
 
-    output.write("**`{}`**\n".format(field["field_path"]))
-    output.write(":   ")
+    output.write("**`{}`**".format(field["field_path"]))
+    output.write("\n:   ")
 
     if "description" in field and field["description"] is not None and len(field["description"].strip()) > 0:
         output.write("{}".format(" ".join(x for x in field["description"].split("\n") if x)).strip()+"\n\n")
@@ -137,7 +141,7 @@ mapped_pages:
 ---
 
 % This file is generated! See scripts/generate_fields_docs.py
-                 
+
 # Exported fields [exported-fields]
 
 This document describes the fields that are exported by {title}. They are grouped in the following categories:

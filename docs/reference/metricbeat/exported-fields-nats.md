@@ -169,6 +169,10 @@ type: integer
 
 ## jetstream [_jetstream]
 
+```{applies_to}
+stack: beta
+```
+
 Information pertaining to a NATS JetStream server
 
 **`nats.jetstream.category`**

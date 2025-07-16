@@ -41,6 +41,10 @@ type: keyword
 
 ## task_stats [_task_stats]
 
+```{applies_to}
+stack: beta
+```
+
 `task_stats` contains the metrics that were scraped from AWS fargate task stats ${ECS_CONTAINER_METADATA_URI_V4}/task/stats metadata endpoint.
 
 **`awsfargate.task_stats.cluster_name`**
