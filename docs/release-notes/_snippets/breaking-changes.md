@@ -1,3 +1,6 @@
+:::{include} /release-notes/_snippets/breaking-changes/8.19.md
+:::
+
 :::{include} /release-notes/_snippets/breaking-changes/9.2.md
 :::
 
