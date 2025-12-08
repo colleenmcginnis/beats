@@ -23,6 +23,6 @@ jobs:
       release_manager: ${{ github.triggering_actor }}
       branching_model: 'latest minor version'
     permissions:
-      contents: read
+      contents: write
       id-token: write
       pull-requests: write
