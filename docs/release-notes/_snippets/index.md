@@ -1,3 +1,6 @@
+:::{include} /release-notes/_snippets/index/8.19.md
+:::
+
 :::{include} /release-notes/_snippets/index/9.2.md
 :::
 
